@@ -7,14 +7,21 @@ const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
 const methodOverride = require('method-override');
 const session = require('express-session');
-const expressLayouts = require('express-ejs-layouts');
 const flash = require('connect-flash');
 const passport = require('passport');
 const cartController = require('./controllers/cartController');
+const paymentController = require('./controllers/paymentController');
+const paypal = require('paypal-rest-sdk');
+const bodyParser = require('body-parser');
+
+const Product = require('./models/product');
+
 
 const PORT = process.env.PORT || 4000;
 var MongoDBStore = require('connect-mongodb-session')(session);
-const dbURI = require('./config/keys').MongoURI
+const dbURI = require('./config/keys').MongoURI;
+const client_Id = require('./config/keys').client_Id;
+const client_secret = require('./config/keys').client_secret;
 
 // const { ensureAuthenticated } = require('./config/auth');
 
@@ -23,18 +30,15 @@ const app = express();
 //Passport config
 require('./config/passport')(passport);
 
-//connect to MongoDB
-
-// const dbURI = 'mongodb+srv://syafii:flea311@cluster0.pqurf.mongodb.net/ssa?retryWrites=true&w=majority'
-// const store = new MongoDBStore({
-//     uri: 'mongodb+srv://syafii:flea311@cluster0.pqurf.mongodb.net/ssa?retryWrites=true&w=majority',
-//     collection: 'sessions'
-// });
-
 const store = new MongoDBStore({
     uri: dbURI,
     collection: 'sessions'
 });
+
+// configure paypal with the credentials you got when you created your paypal app
+//allow parsing of JSON bodies
+app.use(bodyParser.json());
+
 
 //connect mongoose
 
@@ -96,14 +100,24 @@ app.use((req,res,next) => {
 //middleware to convert posts to right format
 
 //TODO: Check if it should be false
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ limit: '200mb', extended: true }));
+
+//configure for sandbox environment
+paypal.configure({
+    'mode': 'sandbox', //sandbox or live
+    'client_id': client_Id,
+    'client_secret': client_secret
+});
 
 //routes
 
 
 //main index
 app.get('/', (req, res) => {
-            res.render('index', { title: 'Home', isLoggedIn: req.user })
+            Product.find().sort({ createdAt: -1 })
+                .then(result => {
+                    res.render('index', { title: 'Home', isLoggedIn: req.user, products: result })
+                })
         });
 
 //cart function
@@ -114,7 +128,28 @@ app.post('/cart/out-cart', cartController.RemoveFromCart);
 
 app.post('/cart/remove-cart', cartController.DeleteCart);
 
+//paypal, payment
+
+app.post('/pay', paymentController.paymentStart);
+
+app.get('/redirect', paymentController.successPayment);
+
+app.get('/success', (req, res) =>
+    res.render('success', {title: "Successful Payment", isLoggedIn: req.user}
+    ));
+
+app.get('/redirect', (req, res) =>
+    res.render('redirect', {title: "Successful Payment", isLoggedIn: req.user}
+    ));
+
+app.get('/cancel', (req, res) =>
+    res.render('cancel', {title: "Cancelled", isLoggedIn: req.user}
+    ));
+
+
+
 //about
+
 app.get('/about', (req, res) => {
     res.render('about', { title: 'About', isLoggedIn: req.user });
 });

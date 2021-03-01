@@ -11,21 +11,20 @@
     <div class="row">
         <div id="cards" class="card-group">
             <div class="col-md-6">
-                <div class="card p-2 border border-dark mb-4">
-                    <img class="animate__animated animate__fadeIn card-img-top" src="<%=product.imageURL%>" alt="product image">
-                </div>
+                <div class="card p-2 border border-dark">
+                    <img class="card-img-top animate__animated animate__fadeIn" src="data:image/jpeg;charset=utf-8;base64,<%=product.imageURL.toString('base64')%>" alt="product image">                </div>
             </div>
-            <div class="col-md-6 align-self-center">
-            <h2><%=product.name%></h2>
+            <div class="col-md-6 align-self-center pt-2">
+            <h2><%=product.name%>, $<%= product.price %></h2>
             <div class="content">
                 <p style="white-space: pre-line;"><%= product.description %></p>
-                <p style="white-space: pre-line;">$<%= product.price %></p>
+<!--                <p style="white-space: pre-line;">$<%= product.price %></p>-->
                 <form action="/cart/in-cart" method="POST">
                     <input type="hidden" name="name" value="<%=product.name%>">
                     <input type="hidden" name="_id" value="<%=product._id%>">
                     <input type="hidden" name="price" value="<%=product.price%>">
-                    <input type="hidden" name="image" value="<%=product.imageURL%>">
-                    <input id="addToCart" type="submit" class="btn btn-warning" value="Add to cart">
+                    <input type="hidden" name="image" value="<%=product.imageURL.toString('base64')%>">
+                    <input id="addToCart" type="submit" class="btn btn-outline-dark btn-block" value="Add to cart">
                 </form>
             </div>
             </div>

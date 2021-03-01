@@ -7,7 +7,7 @@
 
 <%- include('../partials/nav-products.ejs') %>
 
-<div class="create-blog content container">
+<div class="create-blog content container-fluid">
     <h1>Add New Product</h1>
     <form action="/products" method="POST">
 
@@ -23,7 +23,8 @@
 
         <div class="form-group">
             <label for="imageURL">Image URL:</label>
-            <input type="text" id="imageURL" class="form-control" name="imageURL" required>
+<!--            <input type="text" id="imageURL" class="form-control" name="imageURL" required>-->
+            <input type="file" id="imageURL" class="filepond" name="imageURL" required>
         </div>
 
         <div class="form-group">
@@ -35,8 +36,8 @@
             <label for="quantity">Quantity:</label>
             <input type="number" id="quantity" class="form-control" name="quantity" required>
         </div>
-
-        <button class="btn btn-primary">Submit</button>
+        <br>
+        <button class="btn btn-warning">Submit</button>
 <!--        <a href="/users/logout" class="btn btn-warning">Log Out</a>-->
     </form>
     <!--    <button class="testjs">JS Test</button>-->
@@ -44,10 +45,10 @@
 
 <br>
 
-<div class="container">
     <div class="products content">
-        <h1>Edit Products</h1>
         <div class="container-fluid">
+            <h1>Edit Products</h1>
+
             <div class="row">
             </div>
             <div class="row">
@@ -57,8 +58,7 @@
                         <% products.forEach(product => { %>
 
                         <div class="col-sm-3"><div class="card border border-dark p-2 mb-3">
-                                <img class="card-img-top animate__animated animate__fadeIn" src="<%=product.imageURL%>" alt="">
-                                <div class="card-body">
+                                <img class="card-img-top animate__animated animate__fadeIn" src="data:image/jpeg;charset=utf-8;base64,<%=product.imageURL.toString('base64')%>" alt="product image">                                <div class="card-body">
                                     <h5 class="card-title"><%=product.name%></h5>
                                     <p class="card-text">$<%=product.price%></p>
 
@@ -78,7 +78,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <%- include('../partials/footer.ejs') %>
 
